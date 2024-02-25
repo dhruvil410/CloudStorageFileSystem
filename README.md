@@ -83,7 +83,7 @@ Output of test_case1.py, which creates a file, writes "Hello\nWorld\n" to it, re
 ### Testcase 2
 Output of test_case2.py, a Python script comparing the time taken by the local file system with the implemented cloud storage file system. The script writes 1000 lines to a file and then reads the data. Operations on the local file system took 3.4 ms, while on the cloud storage, it took 834.3 ms.
 
-![Testcase 2](images\image2.png)
+![Testcase 2](images/image2.png)
 
 ### File System Operations
 
