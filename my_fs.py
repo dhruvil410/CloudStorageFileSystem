@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from __future__ import with_statement
 
 import os
@@ -13,8 +11,6 @@ import shutil
 import sys
 import signal
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = 'gcloud_key.json'
-
 class Passthrough(Operations):
     def __init__(self, bucket_name):
         self.bucket_name = bucket_name
@@ -27,12 +23,6 @@ class Passthrough(Operations):
 
     def cloud_path(self, partial):
         return partial[1:]
-        # if partial == "/":
-        #     return ""
-        # if '.' in partial:
-        #     return partial[1:]
-        # # if it is directory add '/' so during list blobs it list correctly
-        # return partial[1:] + "/"
     
     def temp_path(self, partial):
         if partial.startswith("/"):
@@ -100,7 +90,6 @@ class Passthrough(Operations):
         print(">> readlink >> : ", path)
         pathname = os.readlink(self.cloud_path(path))
         if pathname.startswith("/"):
-            # Path name is absolute, sanitize it.
             return os.path.relpath(pathname, self.root)
         else:
             return pathname
@@ -127,7 +116,6 @@ class Passthrough(Operations):
             blob = self.bucket.blob(self.cloud_path(path))
             blob.upload_from_string("")
         return
-        # return os.mkdir(self.cloud_path(path), mode)
 
     def statfs(self, path):
         print(">> statfs >> : ", path)
@@ -151,7 +139,6 @@ class Passthrough(Operations):
         print(">> rename >> : ", old, new)
 
         blob = self.bucket.blob(self.cloud_path(old))
-        blob_copy = self.bucket.copy_blob(blob, self.bucket, self.cloud_path(new), if_generation_match=0)
         self.delete_blob(blob)
         return
     
@@ -167,7 +154,6 @@ class Passthrough(Operations):
     def utimens(self, path, times=None):
         print(">> utimens >> : ", path, times)
         return
-        # return os.utime(self.temp_path(path), times)
 
     # File methods
     # ============
@@ -190,7 +176,7 @@ class Passthrough(Operations):
         self.root = tempfile.mkdtemp()
         temp_path = self.temp_path(path)
         fd = os.open(temp_path, os.O_WRONLY | os.O_CREAT, mode)
-        os.chown(temp_path,uid,gid) #chown to context uid & gid
+        os.chown(temp_path,uid,gid)
         return fd
 
     def read(self, path, length, offset, fh):
@@ -237,7 +223,6 @@ class Passthrough(Operations):
     def list_blobs_with_prefix(self, prefix):
         content = []
 
-        # if we specifies delimiter="/", in blobs it only stores file names and in blobs.prefixes it stores directory names
         if(prefix != ""):
             prefix += "/"
         blobs = self.storage_client.list_blobs(self.bucket_name, prefix=prefix, delimiter="/")
@@ -258,8 +243,5 @@ def main(mountpoint, bucket_name):
 
 
 if __name__ == '__main__':
-    main(sys.argv[2], sys.argv[1])
-
-
-#  python3 hello.py /home/dhruv/ECC/Assignments/FileSystem/mount/ /home/dhruv/ECC/Assignments/FileSystem/temp/
-#  python3 my_fs.py my-fs-ecc /home/dhruv/ECC/Assignments/FileSystem/temp/
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = sys.argv[1]
+    main(sys.argv[3], sys.argv[2])
